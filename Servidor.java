@@ -1,18 +1,21 @@
-import java.rmi.*;
+import java.io.*;
+import java.net.*;
 
-public class Servidor {
+public class Servidor{
+    static String host = "230.0.0.30";
+    static int port = 6000;
 
-    public Servidor(){
+    public static void main(String args[])throws IOException, ClassNotFoundException{
+        byte[] buffer = new byte[1024];
+        MulticastSocket multicastSocket = new MulticastSocket(port);
+        InetAddress address = InetAddress.getByName(host);
+        multicastSocket.joinGroup(address);
         
-        try{
-            Interfaz proceso = new Implementacion();
-            Naming.rebind("rmi://localhost/bancormi", proceso);
-        }catch(Exception ex){
-            System.out.println(ex);
+        while(true){
+            DatagramPacket messagePacket = new DatagramPacket(buffer, buffer.length);
+            multicastSocket.receive(messagePacket);
+            String message = new String(messagePacket.getData(), messagePacket.getOffset(), messagePacket.getLength());
+            System.out.println("Mensaje recibido por el cliente - " + message);
         }
-    
-    }
-    public static void main(String[] args) {
-        new Servidor();
     }
 }
